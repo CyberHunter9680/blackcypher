@@ -1,6 +1,5 @@
 import pg from 'pg';
 import dotenv from 'dotenv';
-import sqlite3 from 'sqlite3';
 import fs from 'fs';
 import path from 'path';
 import { decrypt } from './security.js';
@@ -14,10 +13,10 @@ const databaseUrl = process.env.DATABASE_URL;
 const usePostgres = !!(databaseUrl && (databaseUrl.startsWith('postgres://') || databaseUrl.startsWith('postgresql://')));
 
 let pool: any = null;
-let sqliteDb: sqlite3.Database | null = null;
+let sqliteDb: any = null;
 let initialized = false;
 
-function initializeDb() {
+async function initializeDb() {
   if (initialized) return;
   
   if (usePostgres) {
@@ -49,13 +48,16 @@ function initializeDb() {
     
     const sqlitePath = path.join(dbDir, 'blackcypher.sqlite');
     
+    const sqlite3Module = await import('sqlite3');
+    const sqlite3 = sqlite3Module.default;
+    
     sqliteDb = new sqlite3.Database(sqlitePath, (err) => {
       if (err) {
         console.error('❌ SQLite connection error:', err);
       } else {
         console.log('🚀 SQLite connected successfully at:', sqlitePath);
         // Enforce foreign key constraints
-        sqliteDb?.run('PRAGMA foreign_keys = ON;', (pragmaErr) => {
+        sqliteDb?.run('PRAGMA foreign_keys = ON;', (pragmaErr: any) => {
           if (pragmaErr) {
             console.error('❌ Failed to enable SQLite PRAGMA foreign_keys:', pragmaErr);
           }
@@ -132,7 +134,7 @@ function decryptRows(rows: any[]): any[] {
  * Unified query runner that works with Postgres and SQLite
  */
 export async function query(text: string, params?: any[]) {
-  initializeDb();
+  await initializeDb();
   const start = Date.now();
   
   if (usePostgres) {
@@ -156,7 +158,7 @@ export async function query(text: string, params?: any[]) {
     return new Promise<{ rows: any[]; rowCount: number }>((resolve, reject) => {
       const translated = translatePostgresToSqlite(text, params);
       
-      sqliteDb!.all(translated.sql, translated.params, (err, rows) => {
+      sqliteDb!.all(translated.sql, translated.params, (err: any, rows: any) => {
         const duration = Date.now() - start;
         if (err) {
           console.error('❌ SQLite query failed:', { sql: translated.sql, error: err.message });
@@ -281,7 +283,7 @@ async function seedDefaultData() {
  * Initializes/Migrates the database structure automatically on startup
  */
 export async function initDatabase() {
-  initializeDb();
+  await initializeDb();
   try {
     const schemaPath = path.join(process.cwd(), 'schema.sql');
     if (!fs.existsSync(schemaPath)) {
@@ -307,7 +309,7 @@ export async function initDatabase() {
         .replace(/TIMESTAMP WITH TIME ZONE/gi, 'TIMESTAMP');
 
       await new Promise<void>((resolve, reject) => {
-        sqliteDb!.exec(translatedSchemaSql, (err) => {
+        sqliteDb!.exec(translatedSchemaSql, (err: any) => {
           if (err) {
             console.error('❌ Failed to run SQLite schema migrations:', err);
             reject(err);
