@@ -17,7 +17,7 @@ import { InactivityWarningModal } from '../components/shared/InactivityWarningMo
 export interface DBUserProfile {
   id: string;
   email: string;
-  username: string | null;
+  username?: string | null;
   phone: string | null;
   name: string;
   role: 'student' | 'admin';
@@ -117,6 +117,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             role: fbUser.uid === 'mock-admin-888' ? 'admin' : 'student',
             status: 'active',
             avatar: fbUser.photoURL,
+            username: null,
             qualification: null,
             age: null,
             gender: null,
@@ -149,6 +150,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         role: fbUser.uid === 'mock-admin-888' ? 'admin' : 'student',
         status: 'active',
         avatar: fbUser.photoURL || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=200',
+        username: null,
         qualification: 'Student',  // Set default so registration modal doesn't show in offline mode
         age: 21,
         gender: 'male',

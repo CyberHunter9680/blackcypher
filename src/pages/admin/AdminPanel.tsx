@@ -29,6 +29,12 @@ interface Booking {
   created_at: string;
   email: string;
   name: string;
+  institute_name?: string | null;
+  contact_name?: string | null;
+  contact_phone?: string | null;
+  plan_duration?: string | null;
+  amount_paid?: any;
+  receipt_url?: string | null;
 }
 
 interface Submission {
@@ -2498,7 +2504,7 @@ export default function AdminPanel() {
                           <td className="p-4">
                             <div className="text-white font-bold">₹{parseFloat(b.amount_paid).toLocaleString()}</div>
                             <a 
-                              href={b.receipt_url} 
+                              href={b.receipt_url || undefined} 
                               target="_blank" 
                               rel="noreferrer" 
                               className="text-[10px] text-accent-cyan hover:underline flex items-center gap-1 mt-1 font-bold"

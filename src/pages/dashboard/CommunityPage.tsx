@@ -171,7 +171,8 @@ function UserProfileModal({ userId, onClose, onStartChat }: UserProfileModalProp
                 id: profile.id,
                 username: profile.username || 'unknown',
                 name: profile.name || 'Anonymous Operator',
-                role: profile.role || 'student'
+                role: profile.role || 'student',
+                avatar: profile.avatar
               })}
               className="mt-6 w-full py-2.5 rounded-xl bg-accent-cyan hover:bg-cyan-300 text-black font-bold text-xs uppercase tracking-wider transition-all shadow-[0_0_15px_rgba(0,255,102,0.15)] hover:shadow-[0_0_20px_rgba(0,255,102,0.25)]"
             >
